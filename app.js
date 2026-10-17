@@ -255,10 +255,10 @@
       if (kind === "attendance") {
         values.semester = Number(values.semester); values.total = Number(values.total); values.attended = Number(values.attended);
         if (values.attended > values.total) throw new Error("Classes attended cannot exceed classes held.");
-        await window.EduTrackAPI.saveAttendance(values);
+        if (state.editId) await window.EduTrackAPI.updateAttendance(state.editId, values); else await window.EduTrackAPI.saveAttendance(values);
       } else if (kind === "grades") {
         values.semester = Number(values.semester); values.credits = Number(values.credits); values.internal = Number(values.internal); values.external = Number(values.external); values.total = values.internal + values.external; values.points = Number(values.points || 0);
-        await window.EduTrackAPI.saveGrade(values);
+        if (state.editId) await window.EduTrackAPI.updateGrade(state.editId, values); else await window.EduTrackAPI.saveGrade(values);
       } else if (kind === "courses") {
         values.semester = Number(values.semester); values.credits = Number(values.credits);
         if (state.editId) await window.EduTrackAPI.updateCourse(state.editId, values); else await window.EduTrackAPI.addCourse(values);
