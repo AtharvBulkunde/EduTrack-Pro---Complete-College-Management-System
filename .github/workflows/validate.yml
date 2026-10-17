@@ -27,3 +27,6 @@ jobs:
       - name: Install backend dependencies
         working-directory: server
         run: npm install
+      - name: Run API integration smoke test
+        working-directory: server
+        run: npm test
