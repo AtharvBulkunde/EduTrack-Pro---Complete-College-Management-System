@@ -1,6 +1,5 @@
 /* EduTrack Pro API client.
- * Include this file before the inline script in index.html when migrating the page
- * to server-backed records. It provides small typed-by-convention wrappers and
+ * Used by app.html to call the database-backed server API. It provides wrappers and
  * stores only a short-lived access token; never store passwords in localStorage.
  */
 (() => {
