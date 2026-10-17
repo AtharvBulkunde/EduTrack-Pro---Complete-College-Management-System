@@ -170,4 +170,64 @@ router.get("/students", requireAdmin, (req, res) => {
   res.json({ records: rows });
 });
 
+
+router.patch("/courses/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "Invalid course ID." });
+  const schema = z.object({
+    college: z.enum(["engineering", "medical", "business", "law", "arts"]),
+    semester: semesterSchema,
+    code: z.string().trim().min(1).max(30),
+    name: z.string().trim().min(1).max(120),
+    credits: z.coerce.number().int().min(0).max(30),
+    faculty: z.string().trim().max(120).default("")
+  });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid course details.", details: parsed.error.flatten() });
+  const row = parsed.data;
+  try {
+    const result = db.prepare("UPDATE courses SET college = ?, semester = ?, code = ?, name = ?, credits = ?, faculty = ? WHERE id = ?").run(row.college, row.semester, row.code, row.name, row.credits, row.faculty, id);
+    if (!result.changes) return res.status(404).json({ error: "Course not found." });
+    res.json({ record: { id, ...row } });
+  } catch (error) {
+    if (String(error.code).startsWith("SQLITE_CONSTRAINT")) return res.status(409).json({ error: "That course code already exists in this semester." });
+    throw error;
+  }
+});
+
+router.delete("/courses/:id", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "Invalid course ID." });
+  const result = db.prepare("DELETE FROM courses WHERE id = ?").run(id);
+  if (!result.changes) return res.status(404).json({ error: "Course not found." });
+  res.status(204).end();
+});
+
+router.patch("/faculty/:id", requireAdmin, (req, res) => {
+  const id = String(req.params.id || "").trim();
+  const schema = z.object({
+    college: z.enum(["engineering", "medical", "business", "law", "arts"]),
+    name: z.string().trim().min(1).max(120),
+    qualification: z.string().trim().max(120).default(""),
+    experience: z.string().trim().max(80).default(""),
+    specialization: z.string().trim().max(120).default(""),
+    email: z.string().trim().email().or(z.literal("")).default(""),
+    phone: z.string().trim().max(40).default("")
+  });
+  const parsed = schema.safeParse(req.body);
+  if (!id || !parsed.success) return res.status(400).json({ error: "Invalid faculty details.", details: parsed.success ? undefined : parsed.error.flatten() });
+  const row = parsed.data;
+  const result = db.prepare("UPDATE faculty SET college = ?, name = ?, qualification = ?, experience = ?, specialization = ?, email = ?, phone = ? WHERE id = ?").run(row.college, row.name, row.qualification, row.experience, row.specialization, row.email, row.phone, id);
+  if (!result.changes) return res.status(404).json({ error: "Faculty member not found." });
+  res.json({ record: { ...row, id } });
+});
+
+router.delete("/faculty/:id", requireAdmin, (req, res) => {
+  const id = String(req.params.id || "").trim();
+  if (!id) return res.status(400).json({ error: "Invalid faculty ID." });
+  const result = db.prepare("DELETE FROM faculty WHERE id = ?").run(id);
+  if (!result.changes) return res.status(404).json({ error: "Faculty member not found." });
+  res.status(204).end();
+});
+
 module.exports = router;
