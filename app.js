@@ -201,10 +201,10 @@
   $("signup-form").addEventListener("submit", event => {
     event.preventDefault();
     runForm(event.currentTarget, async () => {
-      const result = await window.EduTrackAPI.signup({ firstName: $("signup-first").value.trim(), lastName: $("signup-last").value.trim(), college: $("signup-college").value, email: $("signup-email").value.trim(), password: $("signup-password").value });
+      const result = await window.EduTrackAPI.signup({ firstName: $("signup-first").value.trim(), lastName: $("signup-last").value.trim(), college: $("signup-college").value, email: $("signup-email").value.trim(), password: $("signup-password").value, department: $("signup-department").value.trim(), year: Number($("signup-year").value) });
       window.EduTrackAPI.setToken(result.token);
       showApp(result.user);
-      notify("Account created and saved successfully.");
+      notify(`Account created successfully. Your Student ID is ${result.user.id}. Save it for future sign-ins.`);
     });
   });
   document.querySelectorAll("[data-auth-tab]").forEach(button => button.addEventListener("click", () => showAuth(button.dataset.authTab)));
@@ -212,6 +212,21 @@
   document.querySelectorAll("[data-jump]").forEach(button => button.addEventListener("click", () => navigate(button.dataset.jump)));
   $("logout-btn").addEventListener("click", () => { window.EduTrackAPI.setToken(null); state.user = null; showAuth("login"); notify("You have signed out."); });
   $("mobile-menu").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+  $("copy-student-id").addEventListener("click", async () => {
+    if (!state.user?.id) return;
+    try {
+      await navigator.clipboard.writeText(state.user.id);
+      notify("Student ID copied: " + state.user.id);
+    } catch {
+      const helper = document.createElement("textarea");
+      helper.value = state.user.id;
+      helper.setAttribute("readonly", "");
+      helper.style.position = "fixed"; helper.style.opacity = "0";
+      document.body.appendChild(helper); helper.select();
+      const copied = document.execCommand("copy"); helper.remove();
+      notify(copied ? "Student ID copied: " + state.user.id : "Your Student ID is " + state.user.id, !copied);
+    }
+  });
   $("new-attendance").addEventListener("click", () => openModal("attendance"));
   $("new-grade").addEventListener("click", () => openModal("grades"));
   $("new-course").addEventListener("click", () => openModal("courses"));
