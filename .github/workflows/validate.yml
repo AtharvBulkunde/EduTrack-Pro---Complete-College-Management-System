@@ -1,0 +1,31 @@
+name: Validate EduTrack Pro
+
+on:
+  push:
+    branches: [main, feature/full-stack-backend]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package.json
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check api.js
+          node --check server/src/server.js
+          node --check server/src/db.js
+          node --check server/src/init-db.js
+          node --check server/src/create-admin.js
+          node --check server/src/middleware/auth.js
+          node --check server/src/routes/auth.js
+          node --check server/src/routes/records.js
+      - name: Install backend dependencies
+        working-directory: server
+        run: npm install
