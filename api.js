@@ -36,8 +36,12 @@
     deleteGrade: id => request(`/grades/${encodeURIComponent(id)}`, { method: "DELETE" }),
     courses: semester => request(`/courses?semester=${encodeURIComponent(semester || 1)}`),
     addCourse: body => request("/courses", { method: "POST", body: JSON.stringify(body) }),
+    updateCourse: (id, body) => request(`/courses/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(body) }),
+    deleteCourse: id => request(`/courses/${encodeURIComponent(id)}`, { method: "DELETE" }),
     faculty: () => request("/faculty"),
     addFaculty: body => request("/faculty", { method: "POST", body: JSON.stringify(body) }),
+    updateFaculty: (id, body) => request(`/faculty/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(body) }),
+    deleteFaculty: id => request(`/faculty/${encodeURIComponent(id)}`, { method: "DELETE" }),
     students: () => request("/students")
   };
 })();
