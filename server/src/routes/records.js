@@ -230,4 +230,58 @@ router.delete("/faculty/:id", requireAdmin, (req, res) => {
   res.status(204).end();
 });
 
+
+router.patch("/attendance/:id", (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "Invalid attendance ID." });
+  const schema = z.object({
+    semester: semesterSchema,
+    code: z.string().trim().min(1).max(30),
+    name: z.string().trim().min(1).max(120),
+    faculty: z.string().trim().max(120).default(""),
+    total: z.coerce.number().int().min(0).max(10000),
+    attended: z.coerce.number().int().min(0).max(10000)
+  }).refine(value => value.attended <= value.total, { message: "Attended classes cannot exceed total classes." });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid attendance record.", details: parsed.error.flatten() });
+  const row = parsed.data;
+  try {
+    const result = db.prepare("UPDATE attendance SET semester = ?, course_code = ?, course_name = ?, faculty = ?, total_classes = ?, attended_classes = ? WHERE id = ? AND student_id = ?")
+      .run(row.semester, row.code, row.name, row.faculty, row.total, row.attended, id, req.auth.sub);
+    if (!result.changes) return res.status(404).json({ error: "Attendance record not found." });
+    res.json({ record: { id, ...row } });
+  } catch (error) {
+    if (String(error.code).startsWith("SQLITE_CONSTRAINT")) return res.status(409).json({ error: "An attendance record already exists for that course and semester." });
+    throw error;
+  }
+});
+
+router.patch("/grades/:id", (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "Invalid grade ID." });
+  const schema = z.object({
+    semester: semesterSchema,
+    code: z.string().trim().min(1).max(30),
+    name: z.string().trim().min(1).max(120),
+    credits: z.coerce.number().int().min(0).max(30).default(0),
+    internal: z.coerce.number().min(0).max(100),
+    external: z.coerce.number().min(0).max(100),
+    total: z.coerce.number().min(0).max(200).optional(),
+    grade: z.string().trim().max(5).default(""),
+    points: z.coerce.number().min(0).max(10).default(0)
+  }).transform(value => ({ ...value, total: value.total ?? value.internal + value.external }));
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid grade record.", details: parsed.error.flatten() });
+  const row = parsed.data;
+  try {
+    const result = db.prepare("UPDATE grades SET semester = ?, course_code = ?, course_name = ?, credits = ?, internal_marks = ?, external_marks = ?, total_marks = ?, grade = ?, points = ? WHERE id = ? AND student_id = ?")
+      .run(row.semester, row.code, row.name, row.credits, row.internal, row.external, row.total, row.grade, row.points, id, req.auth.sub);
+    if (!result.changes) return res.status(404).json({ error: "Grade record not found." });
+    res.json({ record: { id, ...row } });
+  } catch (error) {
+    if (String(error.code).startsWith("SQLITE_CONSTRAINT")) return res.status(409).json({ error: "A grade record already exists for that course and semester." });
+    throw error;
+  }
+});
+
 module.exports = router;
