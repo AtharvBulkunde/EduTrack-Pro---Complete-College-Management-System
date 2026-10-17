@@ -8,12 +8,13 @@ cd server
 Copy-Item .env.example .env
 notepad .env
 npm install
+npm test
 npm run init-db
 npm run create-admin
 npm run dev
 ```
 
-Set a private `JWT_SECRET` of at least 32 characters in `.env`. The default client origin is `http://localhost:5500`; keep it aligned with the local frontend server. Open the repository root in VS Code and launch `index.html` using Live Server. Test the API at `http://localhost:4000/api/health`.
+`npm test` runs the database-backed API smoke tests with a temporary test database. Set a private `JWT_SECRET` of at least 32 characters in `.env`. The default client origin is `http://localhost:5500`; keep it aligned with the local frontend server. Open the repository root in VS Code and launch `index.html` using Live Server. Test the API at `http://localhost:4000/api/health`.
 
 ## Routes
 - Public: `GET /api/health`, `POST /api/auth/signup`, `POST /api/auth/login`.
