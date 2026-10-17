@@ -32,7 +32,7 @@
   async function runForm(form, action) {
     setBusy(form, true);
     try { await action(); }
-    catch (error) { notify(error.message || "Something went wrong.", true); }
+    catch (error) { if (form.id === "login-form" || form.id === "signup-form") message(error.message || "Something went wrong.", true); else notify(error.message || "Something went wrong.", true); }
     finally { setBusy(form, false); }
   }
 
@@ -196,7 +196,7 @@
       window.EduTrackAPI.setToken(result.token);
       message("");
       showApp(result.user);
-    }).catch(error => message(error.message, true));
+    });
   });
   $("signup-form").addEventListener("submit", event => {
     event.preventDefault();
@@ -205,7 +205,7 @@
       window.EduTrackAPI.setToken(result.token);
       showApp(result.user);
       notify("Account created and saved successfully.");
-    }).catch(error => message(error.message, true));
+    });
   });
   document.querySelectorAll("[data-auth-tab]").forEach(button => button.addEventListener("click", () => showAuth(button.dataset.authTab)));
   document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => navigate(button.dataset.view)));
