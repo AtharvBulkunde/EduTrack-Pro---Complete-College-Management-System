@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { z } = require("zod");
 const db = require("../db");
+const { requireAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -86,13 +87,13 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/me", (req, res) => {
+router.get("/me", requireAuth, (req, res) => {
   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.auth.sub);
   if (!row) return res.status(404).json({ error: "Account not found." });
   res.json({ user: publicUser(row) });
 });
 
-router.patch("/me", (req, res, next) => {
+router.patch("/me", requireAuth, (req, res, next) => {
   try {
     const schema = z.object({
       firstName: z.string().trim().min(1).max(80).optional(),
