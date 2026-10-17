@@ -148,3 +148,19 @@ tbody tr:hover{background:#ffffff05}
   .welcome-panel h2{font-size:27px}
   .metric-card,.panel{border-radius:15px}
 }
+
+
+/* Registration + student identity polish */
+#signup-form{gap:15px}
+#signup-form .form-row{align-items:start}
+#signup-form label{min-width:0}
+#signup-department,#signup-year{width:100%;min-width:0}
+.profile-id-detail{display:grid;grid-template-columns:1fr auto;gap:7px 12px;align-items:center}
+.profile-id-detail span{grid-column:1/-1}
+.profile-id-detail b{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:17px;letter-spacing:.8px;color:#f3f3ee}
+.profile-id-detail .mini-btn{grid-column:2;grid-row:2}
+#signup-password:invalid:not(:placeholder-shown){border-color:#b96e73}
+@media(max-width:540px){
+  #signup-form .form-row{grid-template-columns:1fr}
+  .profile-id-detail{grid-template-columns:1fr auto}
+}
