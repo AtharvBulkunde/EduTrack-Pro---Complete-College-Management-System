@@ -24,11 +24,14 @@ From the `server` directory:
 
 ```powershell
 npm install
+npm test
 npm run init-db
 npm run create-admin
 ```
 
 Enter the administrator’s name, email, college, and password when prompted. Use a unique email and a password of at least 12 characters. Public signup creates student accounts only; the admin command is the local bootstrap route for privileged access.
+
+`npm test` runs an API smoke test against a disposable SQLite database and removes its test files afterward. It checks authentication, profile, attendance, grades, and admin course/faculty operations.
 
 ## 3. Start the backend
 Still from `server`:
